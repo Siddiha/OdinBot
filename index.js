@@ -4,8 +4,14 @@ const classifierJSON = require('./classifier.json')
 var nlpControl = require('./nlpcontrol');
 var pomo = require('./pomo');
 var pomoStatus = require('./pomo').pomoStatus
+const fs = require('fs');
 
-telegram = new TelegramBot("841504355:AAF67TNOSpE5GYna-2SF7tgoyaH_xc9QHvs", { polling: true });
+const token = process.env.TELEGRAM_TOKEN;
+if (!token) {
+  console.error('Missing TELEGRAM_TOKEN. Create a .env file with TELEGRAM_TOKEN=your_token or set the env var.');
+  process.exit(1);
+}
+telegram = new TelegramBot(token, { polling: true });
 var classifier = new natural.BayesClassifier();
 
 // Add the NLP.
@@ -60,6 +66,16 @@ telegram.onText(/\/pomodoro (.+)/, (msg, match) => {
     global.timer = setTimeout(pomo.pomoSession, 25 * 60 * 1000, msg, telegram);
     global.timer;
     global.timeOutStart = Date.now();
+  }
+});
+
+// On /start, send the Odin logo image
+telegram.onText(/^\/start$/, (msg) => {
+  const imagePath = __dirname + '/odin.png';
+  try {
+    telegram.sendPhoto(msg.chat.id, fs.createReadStream(imagePath), { caption: 'Welcome to Odin Bot' });
+  } catch (err) {
+    telegram.sendMessage(msg.chat.id, 'Welcome to Odin Bot');
   }
 });
 
