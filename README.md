@@ -1,11 +1,11 @@
-# OdinBot
+# OdinBot Details
 <p align="center">
 A bot that helps you excel on your daily tasks. 
 <p align="center">
 Odin is a Telegram bot created through the Telegram API. It is designed to track and help with your daily sessions. It uses Node's Natural Language Processing to distinguish phrases and categorize them into specified intents, in order to provide a suitable response. It has built-in methods (such as "/pomodoro") that allow users to utilize their functions. 
   
   
-## At a Glance
+## At a Glance si
 
 Demo #1             |  Demo #2
 :-------------------------:|:-------------------------:
@@ -18,7 +18,7 @@ Demo #1             |  Demo #2
   
 >The Pomodoro Technique is a time management method developed by Francesco Cirillo in the late 1980s. The technique uses a timer to break down work into intervals traditionally 25 minutes in length, separated by short breaks. These intervals are known as "pomodori", from the Italian word pomodoro for "tomato". The method is based on the idea that frequent breaks can improve mental agility.
 
-After you have entered "/pomodoro \<session name\>", \<session name\> executes.
+After you have entered  the commands "/pomodoro \<session name\>", \<session name\> executes.
 
 - Sending the text `/pomodoro status` will let you know how much time you have left in your current Pomodoro session or break.
 - Sending any other phrase will start a 25 minute pomodoro session. You'll be notified 25 minutes later via text to take a break. And then will be notified 7 minutes after that to get back to work (at which point you can send another phrase to start the Pomodoro session).
