@@ -1,51 +1,124 @@
-// Track statuses for Pomodoro method.
-global.breakStatus = false;
-global.pomoStatus = false;
-global.noSession = false;
-global.lastSession;
-global.timer;
-global.timeOutStart;
-var elapsedTime;
+const { workMinutes, breakMinutes } = require('../config');
+const MINUTE_MS = 60 * 1000;
 
-function clearSession(msg, telegram) {
-    telegram.sendMessage(msg.chat.id, "All sessions cleared.");
-    clearTimeout(timer);
+const state = {
+  active: false,
+  onBreak: false,
+  sessionName: '',
+  timer: null,
+  startTime: null,
+};
+
+function clearTimer() {
+  if (state.timer) {
+    clearTimeout(state.timer);
+    state.timer = null;
+  }
+}
+
+function resetState() {
+  clearTimer();
+  state.active = false;
+  state.onBreak = false;
+  state.sessionName = '';
+  state.startTime = null;
+}
+
+function getMinutesRemaining(totalMinutes) {
+  if (!state.startTime) {
+    return totalMinutes;
   }
 
-function pomoSession(msg, telegram) {
-    telegram.sendMessage(msg.chat.id, "25 minutes done! Take a break.");
-    pomoStatus = false;
-    breakStatus = true;
-    timer = setTimeout(breakSession, 7 * 60 * 1000, msg, telegram);
-    timer;
-    timeOutStart = Date.now();
+  const elapsed = (Date.now() - state.startTime) / MINUTE_MS;
+  return Number(Math.max(0, totalMinutes - elapsed).toFixed(1));
+}
+
+function start(msg, telegram, sessionName) {
+  if (!sessionName) {
+    telegram.sendMessage(msg.chat.id, 'Please provide a session name, for example: /pomodoro Study');
+    return;
   }
 
-// Get current status of the Pomodoro session.
-function getStatus(msg, session, telegram) {
-    if (noSession) {
-      telegram.sendMessage(msg.chat.id, "No pomodoro session is currently running.");
-    }
-    else if (pomoStatus) {
-      elapsedTime = Number((25 - ((Date.now() - timeOutStart) / 1000) / 60).toFixed(1));
-      telegram.sendMessage(msg.chat.id, `Session "${session}" is currently running. You have ${elapsedTime} minute(s) left.`);
-    }
-    else if (breakStatus) {
-      elapsedTime = Number((7 - ((Date.now() - timeOutStart) / 1000) / 60).toFixed(1));
-      telegram.sendMessage(msg.chat.id, `You're on break from "${session}"! You have ${elapsedTime} minute(s) left before work.`);
-    }
+  if (state.active) {
+    telegram.sendMessage(msg.chat.id, `A session is already running: "${state.sessionName}". Send /pomodoro status or /pomodoro clear.`);
+    return;
   }
 
-  function breakSession(msg, telegram) {
-    noSession = true;
-    breakStatus = false;
-    timeOutStart = Date.now();
-    telegram.sendMessage(msg.chat.id, "7 minutes done. Back to work!");
+  if (state.onBreak) {
+    clearTimer();
+    state.onBreak = false;
   }
 
-  module.exports = {
-    clear: clearSession,
-    pomoSession: pomoSession,
-    break: breakSession,
-    status: getStatus,
-  };
+  state.sessionName = sessionName;
+  state.active = true;
+  state.startTime = Date.now();
+  state.timer = setTimeout(() => finishWork(msg, telegram), workMinutes * MINUTE_MS);
+
+  telegram.sendMessage(msg.chat.id, `Session "${sessionName}" started. I will notify you in ${workMinutes} minutes.`);
+}
+
+function finishWork(msg, telegram) {
+  state.active = false;
+  state.onBreak = true;
+  state.startTime = Date.now();
+  state.timer = setTimeout(() => endBreak(msg, telegram), breakMinutes * MINUTE_MS);
+
+  telegram.sendMessage(msg.chat.id, `25 minutes done! Take a break from "${state.sessionName}".`);
+}
+
+function endBreak(msg, telegram) {
+  state.onBreak = false;
+  state.sessionName = '';
+  state.startTime = null;
+  state.timer = null;
+
+  telegram.sendMessage(msg.chat.id, `7 minutes done. Back to work! You can start a new session with /pomodoro <name>.`);
+}
+
+function status(msg, telegram) {
+  if (!state.active && !state.onBreak) {
+    telegram.sendMessage(msg.chat.id, 'No pomodoro session is currently running. Start one with /pomodoro <name>.');
+    return;
+  }
+
+  if (state.active) {
+    const minutesLeft = getMinutesRemaining(workMinutes);
+    telegram.sendMessage(msg.chat.id, `Session "${state.sessionName}" is currently running. You have ${minutesLeft} minute(s) left.`);
+    return;
+  }
+
+  const minutesLeft = getMinutesRemaining(breakMinutes);
+  telegram.sendMessage(msg.chat.id, `You're on break from "${state.sessionName}"! You have ${minutesLeft} minute(s) left before work.`);
+}
+
+function breakNow(msg, telegram) {
+  if (!state.active) {
+    telegram.sendMessage(msg.chat.id, 'No active session to pause. Start one with /pomodoro <name>.');
+    return;
+  }
+
+  clearTimer();
+  state.active = false;
+  state.onBreak = true;
+  state.startTime = Date.now();
+  state.timer = setTimeout(() => endBreak(msg, telegram), breakMinutes * MINUTE_MS);
+
+  telegram.sendMessage(msg.chat.id, `Break started early from "${state.sessionName}". I will notify you in ${breakMinutes} minutes.`);
+}
+
+function stop(msg, telegram) {
+  if (!state.active && !state.onBreak) {
+    telegram.sendMessage(msg.chat.id, 'No pomodoro session is currently running.');
+    return;
+  }
+
+  resetState();
+  telegram.sendMessage(msg.chat.id, 'Pomodoro session stopped. You can start a new session with /pomodoro <name>.');
+}
+
+module.exports = {
+  start,
+  status,
+  clear: stop,
+  breakNow,
+};

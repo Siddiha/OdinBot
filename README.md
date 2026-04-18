@@ -36,20 +36,44 @@ After you have entered  the commands "/pomodoro \<session name\>", \<session nam
 - `/pomodoro status`: "No pomodoro session is currently running."
 - And so on...
 
-## Get Started
-Get your own Telegram token from BotFather. More on that [here](https://core.telegram.org/bots). Then create a `.env` file in the project root with:
+## Project structure
 
+- `src/`
+  - `index.js` — bot entrypoint
+  - `config.js` — shared configuration and help text
+  - `commands/`
+    - `pomodoro.js` — pomodoro session logic
+    - `nlp.js` — NLP training and responses
+  - `data/`
+    - `classifier.json` — classifier definition data
+- `images/` — image assets used by the bot
+- `.env.example` — example environment configuration
+
+## Get Started
+Get your own Telegram token from BotFather. More on that [here](https://core.telegram.org/bots).
+
+1. Create a `.env` file in the project root with:
 ```env
 TELEGRAM_TOKEN=your_token_here
 ```
-
-The bot source files are now organized under `src/`.
-
-1. Clone this repository and run:
+2. Install dependencies:
 ```sh
 npm install
 ```
-2. Run the bot:
+3. Run the bot in development mode:
 ```sh
 npm run bot
 ```
+4. Or run the bot in production mode:
+```sh
+npm start
+```
+
+## Commands
+- `/start` — show the welcome image and start the bot
+- `/help` — show supported commands
+- `/pomodoro <session name>` — start a 25-minute Pomodoro session
+- `/pomodoro status` — show current session or break status
+- `/pomodoro clear` — cancel the current Pomodoro session
+- `/break` — begin a break early
+- `/stop` or `/cancel` — stop the current session
