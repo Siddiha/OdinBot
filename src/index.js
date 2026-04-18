@@ -1,3 +1,4 @@
+const path = require('path');
 const TelegramBot = require('node-telegram-bot-api');
 const natural = require('natural');
 const classifierJSON = require('./classifier.json')
@@ -71,7 +72,7 @@ telegram.onText(/\/pomodoro (.+)/, (msg, match) => {
 
 // On /start, send the Odin logo image
 telegram.onText(/^\/start$/, (msg) => {
-  const imagePath = __dirname + '/odin.png';
+  const imagePath = path.join(__dirname, '..', 'images', 'odin.png');
   try {
     telegram.sendPhoto(msg.chat.id, fs.createReadStream(imagePath), { caption: 'Welcome to Odin Bot' });
   } catch (err) {

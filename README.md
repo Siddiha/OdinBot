@@ -5,7 +5,7 @@ A bot that helps you excel on your daily tasks.
 Odin is a Telegram bot created through the Telegram API. It is designed to track and help with your daily sessions. It uses Node's Natural Language Processing to distinguish phrases and categorize them into specified intents, in order to provide a suitable response. It has built-in methods (such as "/pomodoro") that allow users to utilize their functions. 
   
   
-## At a Glance si
+## At a Glance 
 
 Demo #1             |  Demo #2
 :-------------------------:|:-------------------------:
@@ -37,9 +37,15 @@ After you have entered  the commands "/pomodoro \<session name\>", \<session nam
 - And so on...
 
 ## Get Started
-Get your own Telegram token from BotFather. More on that [here](https://core.telegram.org/bots). Then, plug in the token at the top of index.js.
+Get your own Telegram token from BotFather. More on that [here](https://core.telegram.org/bots). Then create a `.env` file in the project root with:
 
-1. Clone this reposity and run:
+```env
+TELEGRAM_TOKEN=your_token_here
+```
+
+The bot source files are now organized under `src/`.
+
+1. Clone this repository and run:
 ```sh
 npm install
 ```
