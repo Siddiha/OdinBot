@@ -1,4 +1,4 @@
-# OdinBot Details
+# OdinBot 
 <p align="center">
 A bot that helps you excel on your daily tasks. 
 <p align="center">
